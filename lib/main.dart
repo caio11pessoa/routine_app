@@ -1,12 +1,31 @@
+import 'package:dart_appwrite/dart_appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:routine_app/collections/category.dart';
 import 'package:routine_app/collections/routine.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:routine_app/screens/create_routine.dart';
+// import 'package:appwrite/appwrite.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+//   Map<dynamic, dynamic> test = {
+//   'id': 30,
+//   'name': 'João'
+// };
+//   try {
+//     final document = databases.createDocument(
+//       databaseId: "64b67cf22656607de4b9", 
+//       collectionId: "64b67d2a0ab2487c293d", 
+//       documentId: ID.unique(), 
+//       data: test
+//       );
+//   } on AppwriteException catch(e) {
+//     print(e);
+//   }
+
+  
   final dir = await getApplicationSupportDirectory();
   final isar = await Isar.open(
       [RoutineSchema, CategorySchema], directory: dir.path);
@@ -24,7 +43,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MainPage(isar: isar,),
+      home: MainPage(isar: isar),
       debugShowCheckedModeBanner: false,
     );
   }

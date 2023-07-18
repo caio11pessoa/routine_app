@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:routine_app/collections/category.dart';
-
+import 'package:dart_appwrite/dart_appwrite.dart';
 
 class CreateRoutine extends StatefulWidget {
   final Isar isar;
@@ -12,8 +12,8 @@ class CreateRoutine extends StatefulWidget {
 }
 
 class _CreateRoutineState extends State<CreateRoutine> {
-  List<String> categories = ['work', 'school', 'home'];
-  String dropdownValue = 'work';
+  List<Category>? categories;
+  Category? dropdownValue;
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
   final TextEditingController _newCatController = TextEditingController();
@@ -28,6 +28,12 @@ class _CreateRoutineState extends State<CreateRoutine> {
   ];
   String dropdownDay = "monday";
   TimeOfDay selectedTime = TimeOfDay.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _readCategory();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,11 +61,11 @@ class _CreateRoutineState extends State<CreateRoutine> {
                     value: dropdownValue,
                     icon: const Icon(Icons.keyboard_arrow_down),
                     items: categories
-                        .map<DropdownMenuItem<String>>((String nvalue) {
-                      return DropdownMenuItem<String>(
-                          value: nvalue, child: Text(nvalue));
+                        ?.map<DropdownMenuItem<Category>>((Category nvalue) {
+                      return DropdownMenuItem<Category>(
+                          value: nvalue, child: Text(nvalue.name));
                     }).toList(),
-                    onChanged: (String? newValue) {
+                    onChanged: (Category? newValue) {
                       setState(() {
                         dropdownValue = newValue!;
                       });
@@ -171,7 +177,37 @@ class _CreateRoutineState extends State<CreateRoutine> {
     await isar.writeTxn(() async {
       await categories.put(newCategory);
     });
+  Map<dynamic, dynamic> test = {
+  'id': newCategory.id,
+  'name': newCategory.name
+};
+  Client client = Client();
 
-    _newCatController.clear();
+  client.setEndpoint('https://cloud.appwrite.io/v1')
+    .setProject('64a6e76c08c9e35343b3')
+    .setKey('88b3d7f02c889b308fd93b99432e6cbd1ee8483007cc31ad59ec26206b064565562a756af35820461d355f15d7760e936c09b266a9c6628bcc1458cfad3e596d64e93784ef09b07bbc842add42f6e9b1afb0a81aaacfb39f311bc228d7df93915ffe9319bcf0c65d5fa6d351120d986cc401c534170b1fce120055bde336fc7e');
+
+  final db = Databases(client);
+
+try{
+  db.createDocument(
+      databaseId: "64b67cf22656607de4b9", 
+      collectionId: "64b67d2a0ab2487c293d", 
+      documentId: ID.unique(), 
+      data: test
+  );
+} on AppwriteException catch(e) {
+    print(e);
   } 
+    _newCatController.clear();
+    _readCategory();
+  } 
+  _readCategory() async{
+    final categoryCollection = widget.isar.categorys;
+    final getCategories = await categoryCollection.where().findAll();
+    setState(() {
+      dropdownValue = null;
+      categories = getCategories;
+    });
+  }
 }
